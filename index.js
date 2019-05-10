@@ -1,10 +1,10 @@
+/* eslint-disable no-underscore-dangle */
 const { Writable } = require('stream');
 const sftp = require('./lib/sftp');
 
-
 const o = {};
 
-const connect = async (host, port, username, password, serverHostKey, kex) => {
+const connect = async (host, port, username, password /* serverHostKey, kex */) => {
   const connSettings = {
     host,
     port,
@@ -20,14 +20,14 @@ const connect = async (host, port, username, password, serverHostKey, kex) => {
   }
 };
 
-const readdir = async (path) => {
+const readdir = async path => {
   const list = await sftp.readdir(o.connection, path);
   return list;
 };
 
 const disconnect = async () => {
   await sftp.disconnect();
-}
+};
 
 const download = function(fileName, writeStream) {
   return new Promise((resolve, reject) => {
@@ -42,7 +42,7 @@ const download = function(fileName, writeStream) {
   });
 };
 
-const getFileData = async (fileName) => {
+const getFileData = async fileName => {
   try {
     let data = '';
     const s = new Writable();
@@ -50,7 +50,7 @@ const getFileData = async (fileName) => {
       data += chunk.toString();
       next();
     };
-  
+
     const success = await download(fileName, s);
 
     if (!success) throw new Error('Failed to get file data');
@@ -61,6 +61,33 @@ const getFileData = async (fileName) => {
   }
 };
 
+/**
+ * Create a file on the FTP with the given data. Uses streams.
+ *
+ * @param {*} fullPath The path and filename of the file to create
+ * @param {*} data The data the file will contain
+ */
+const streamToFtp = async (fullPath, data) => {
+  try {
+    await sftp.putFileData(o.connection, fullPath, data);
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Create a file on the FTP with the given data.
+ *
+ * @param {*} filePath The path and filename of the file to create
+ * @param {*} content The data the file will contain
+ */
+const upload = async (filePath, content) => {
+  try {
+    await sftp.writeFile(o.connection, filePath, content);
+  } catch (err) {
+    throw err;
+  }
+};
 
 const move = async (fileFrom, fileTo) => {
   try {
@@ -75,5 +102,7 @@ module.exports = {
   readdir,
   disconnect,
   getFileData,
+  streamToFtp,
+  upload,
   move,
 };
