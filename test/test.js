@@ -42,4 +42,20 @@ const start = async () => {
   await sftp.disconnect();
 };
 
+const disconnectTimeout = async () => {
+  try {
+    console.log('Testing repeated connect / disconnect...');
+    for (const x of Array(100).keys()) {
+      process.stdout.write('.');
+      await sftp.connect(config.host, config.port, config.username, config.password);
+      await sftp.disconnect();
+    }
+    console.log('');
+    console.log('Completed OK');
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 start();
+disconnectTimeout();

@@ -13,6 +13,8 @@ const connect = async (host, port, username, password /* serverHostKey, kex */) 
   };
 
   try {
+    if (o.connection) return o.connection;
+
     o.connection = await sftp.connect(connSettings);
     return o.connection;
   } catch (err) {
@@ -26,7 +28,10 @@ const readdir = async path => {
 };
 
 const disconnect = async () => {
-  await sftp.disconnect();
+  if (o.connection) {
+    await sftp.disconnect(o.connection);
+    delete o.connection;
+  }
 };
 
 const download = function(fileName, writeStream) {
