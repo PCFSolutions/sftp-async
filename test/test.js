@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-console */
 const sftp = require('../index');
 const config = require('./test.config');
@@ -45,6 +46,7 @@ const start = async () => {
 const disconnectTimeout = async () => {
   try {
     console.log('Testing repeated connect / disconnect...');
+    // eslint-disable-next-line no-unused-vars, no-restricted-syntax
     for (const x of Array(100).keys()) {
       process.stdout.write('.');
       await sftp.connect(config.host, config.port, config.username, config.password);
@@ -57,5 +59,9 @@ const disconnectTimeout = async () => {
   }
 };
 
-start();
-disconnectTimeout();
+const runTests = async () => {
+  await start();
+  await disconnectTimeout();
+}
+
+runTests();
