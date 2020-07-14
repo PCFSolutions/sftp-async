@@ -15,7 +15,10 @@ const connect = async (host, port, username, password /* serverHostKey, kex */) 
   try {
     if (o.connection) return o.connection;
 
-    o.connection = await sftp.connect(connSettings);
+    const [connection, client] = await sftp.connect(connSettings);
+    o.connection = connection;
+    o.client = client;
+  
     return o.connection;
   } catch (err) {
     throw new Error(err.message);
@@ -29,8 +32,9 @@ const readdir = async path => {
 
 const disconnect = async () => {
   if (o.connection) {
-    await sftp.disconnect(o.connection);
+    await sftp.disconnect(o.connection, o.client);
     delete o.connection;
+    delete o.client;
   }
 };
 
