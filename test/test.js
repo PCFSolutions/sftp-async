@@ -1,7 +1,21 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-console */
+const fs = require('fs');
 const sftp = require('../index');
 const config = require('./test.config');
+
+const streamTest = async () => {
+  try {
+    await sftp.connect(config.host, config.port, config.username, config.password);
+    
+    const readableStream = fs.createReadStream('./README.md', { encoding: 'utf8' });
+    await sftp.upload('/upload/README.md', null, readableStream)
+  } catch (e) {
+    console.log(e);
+    console.log(JSON.stringify(e, null, 2));
+  }
+  await sftp.disconnect();
+}
 
 const start = async () => {
   try {
@@ -62,6 +76,7 @@ const disconnectTimeout = async () => {
 const runTests = async () => {
   await start();
   await disconnectTimeout();
+  await streamTest();
 }
 
 runTests();

@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 /* eslint-disable no-underscore-dangle */
 const { Writable } = require('stream');
 const sftp = require('./lib/sftp');
@@ -18,14 +19,14 @@ const connect = async (host, port, username, password /* serverHostKey, kex */) 
     const [connection, client] = await sftp.connect(connSettings);
     o.connection = connection;
     o.client = client;
-  
+
     return o.connection;
   } catch (err) {
     throw new Error(err.message);
   }
 };
 
-const readdir = async path => {
+const readdir = async (path) => {
   const list = await sftp.readdir(o.connection, path);
   return list;
 };
@@ -38,7 +39,7 @@ const disconnect = async () => {
   }
 };
 
-const download = function(fileName, writeStream) {
+const download = function (fileName, writeStream) {
   return new Promise((resolve, reject) => {
     const stream = o.connection.createReadStream(fileName);
     stream.pipe(writeStream);
@@ -51,7 +52,7 @@ const download = function(fileName, writeStream) {
   });
 };
 
-const getFileData = async fileName => {
+const getFileData = async (fileName) => {
   try {
     let data = '';
     const s = new Writable();
@@ -85,14 +86,24 @@ const streamToFtp = async (fullPath, data) => {
 };
 
 /**
- * Create a file on the FTP with the given data.
+ * Create a file on the FTP with the given data. You must supply
+ * either the raw file content, or a readable stream to a file.
  *
  * @param {*} filePath The path and filename of the file to create
  * @param {*} content The data the file will contain
+ * @param {*} stream A file readstream
  */
-const upload = async (filePath, content) => {
+const upload = async (filePath, content, stream) => {
   try {
-    await sftp.writeFile(o.connection, filePath, content);
+    if (!content && !stream) {
+      throw new Error('You must include either raw file content, or a stream');
+    }
+
+    if (stream) {
+      await sftp.streamToFtp(o.connection, filePath, stream);
+    } else if (content) {
+      await sftp.writeFile(o.connection, filePath, content);
+    }
   } catch (err) {
     throw err;
   }
