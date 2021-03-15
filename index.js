@@ -5,12 +5,20 @@ const sftp = require('./lib/sftp');
 const o = {};
 
 const connect = async (host, port, username, password /* serverHostKey, kex */) => {
-  const connSettings = {
+  let connSettings = {
     host,
     port,
     username,
     password,
   };
+
+  // test for connection settings object in first argument
+  if (typeof(host) === 'object') {
+    connSettings = host;
+  }
+
+  // freeze `connSettings` to prevent further mutation
+  connSettings = Object.freeze(connSettings);
 
   try {
     if (o.connection) return o.connection;
@@ -18,7 +26,7 @@ const connect = async (host, port, username, password /* serverHostKey, kex */) 
     const [connection, client] = await sftp.connect(connSettings);
     o.connection = connection;
     o.client = client;
-  
+
     return o.connection;
   } catch (err) {
     throw new Error(err.message);
