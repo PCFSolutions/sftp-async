@@ -10,6 +10,26 @@ const connect = async (host, port, username, password /* serverHostKey, kex */) 
     port,
     username,
     password,
+    algorithms: {
+      cipher: [
+        'aes128-ctr',
+        'aes192-ctr',
+        'aes256-ctr',
+        'aes128-gcm',
+        'aes128-gcm@openssh.com',
+        'aes256-gcm',
+        'aes256-gcm@openssh.com',
+        'aes256-cbc',
+        'aes192-cbc',
+        'aes128-cbc',
+        'blowfish-cbc',
+        '3des-cbc',
+        'arcfour256',
+        'arcfour128',
+        'cast128-cbc',
+        'arcfour',
+      ],
+    },
   };
 
   try {
@@ -18,14 +38,14 @@ const connect = async (host, port, username, password /* serverHostKey, kex */) 
     const [connection, client] = await sftp.connect(connSettings);
     o.connection = connection;
     o.client = client;
-  
+
     return o.connection;
   } catch (err) {
     throw new Error(err.message);
   }
 };
 
-const readdir = async path => {
+const readdir = async (path) => {
   const list = await sftp.readdir(o.connection, path);
   return list;
 };
@@ -38,7 +58,7 @@ const disconnect = async () => {
   }
 };
 
-const download = function(fileName, writeStream) {
+const download = function (fileName, writeStream) {
   return new Promise((resolve, reject) => {
     const stream = o.connection.createReadStream(fileName);
     stream.pipe(writeStream);
@@ -51,7 +71,7 @@ const download = function(fileName, writeStream) {
   });
 };
 
-const getFileData = async fileName => {
+const getFileData = async (fileName) => {
   try {
     let data = '';
     const s = new Writable();
