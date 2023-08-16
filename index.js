@@ -10,6 +10,9 @@ const connect = async (host, port, username, password /* serverHostKey, kex */) 
     port,
     username,
     password,
+    algorithms: {
+      cipher: ['aes128-ctr','aes192-ctr','aes256-ctr','aes128-gcm','aes128-gcm@openssh.com','aes256-gcm','aes256-gcm@openssh.com','aes256-cbc','aes192-cbc','aes128-cbc','blowfish-cbc','3des-cbc','arcfour256','arcfour128','cast128-cbc','arcfour']
+    },
   };
 
   try {
